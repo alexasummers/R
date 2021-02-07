@@ -5,3 +5,4 @@ print(myString)
 #We can also save things using = rather than <- :
 myString2 = "My first script in R"
 print(myString2)
+
