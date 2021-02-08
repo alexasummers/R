@@ -2,7 +2,7 @@
 x = c(1.1)
 print(x)
 
-#Multiple elements vector
+#Multiple elements vector. Use  c to combine elements of the vector together
 y <-c(1, 3, 2, 5)
 print(y)
 
@@ -22,7 +22,7 @@ y + z
 ls()
 
 #Delete object that we don't want
-rn(x)
+rm(x)
 
 #Again, look at list of all objects we have saved so far
 ls()
