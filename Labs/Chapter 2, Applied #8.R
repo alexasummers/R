@@ -37,7 +37,12 @@ hist(college$P.Undergrad, col=5, breaks=2)
 hist(college$Top10perc, col=10)
 hist(college$Terminal, breaks = 8)
 hist(college$Outstate, col = 3, breaks = 2)
-hist(college$Top10perc)
-hist(college$Top25perc)
+hist(college$Room.Board)
+hist(college$Books)
 
 #C(VI)
+#Upon further investigation of the data, I have discovered that there is a more of a bell distribution of new 
+#students coming from the top 25% in their high school than the top 10%. I also discovered that the majority of 
+#colleges have more full-time undergrad students than part-time undergrad students.Lastly, students spend a 
+#much wider range on room/board costs than they do on textbooks-- textbooks have a relatively median cost.
+
