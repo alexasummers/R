@@ -1,6 +1,9 @@
 library(MASS)
-
+library (ISLR)
 # Interpretations:
+
+#predictors are independent variables (ex. TV, radio, newspaper)
+#Response variable (sales)
 
 # Residuals: Difference between observed response values and the response values the model predicted
 # Look for a symmetrical distribution across these points on the mean value zero (0)-- if not symmetrical,
@@ -51,10 +54,62 @@ summary(fit3)
 fit4=update(fit3,~.-age-indus) # Update fit 3, remove age and indus
 summary(fit4)
 
-#Interaction terms
+#Interaction terms -- nonlinear combinations of two or more predictors.
 
+Advertising = read.csv("Advertising.csv", header = TRUE)
 
+#view dataset in a spreadsheet-like window
+fix ( Advertising )
 
-#Non-linear transformations of the predictors
+#Find number of observations or rows, and number of variables, or columns
+
+dim ( Advertising )
+
+#check variable names
+names ( Advertising )
+
+#Tell R to make the variables in this data frame available by name || if needed: detach ( Advertising )
+attach ( Advertising )
+
+fit = lm(sales~TV*radio, data = Advertising)
+
+summary(fit)
+
+#Non-linear transformations of the predictors -- might increases or decrease linear relationship
+lm.fit1 = lm(sales~TV,data = Advertising)
+plot(Advertising$TV, Advertising$sales)
+abline(lm.fit1,col="red")
+
+summary(lm.fit1)
+
+#Create a predictor of TV^2 using I(TV^2)
+lm.fit2 = lm(sales~TV*I(TV^2))
+summary(lm.fit2)
+plot(lm.fit2)
+
+#polynomial transformation-- produces a fifth-order polynomial fit:
+# reveals that no polynomial terms beyond the first order have significant p-values in a regression fit
+
+lm.fit3 = lm(sales~poly(TV,5))
+summary(lm.fit3)
+plot(lm.fit3)
+
+#log transformation
+lm.fit4 = lm(sales~log(TV))
+summary(lm.fit4)
+plot(lm.fit4)
 
 #Qualitative predictors
+
+Carseats = fix(Carseats)
+dim(Carseats)
+names(Carseats)
+attach(Carseats)
+
+#fit a multiple regression model
+
+lm.fit5 = lm(Sales~.+Income:Advertising+Price:Age, data = Carseats)
+summary (lm.fit5)
+
+#Get and set contrast matrices, converts vector into two-level factor
+contrasts(ShelveLoc)
