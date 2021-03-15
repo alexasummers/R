@@ -113,3 +113,4 @@ summary (lm.fit5)
 
 #Get and set contrast matrices, converts vector into two-level factor
 contrasts(ShelveLoc)
+
