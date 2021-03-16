@@ -5,9 +5,9 @@
 # Responder ~ Predictor
 
 #KNN questions
-library(MASS)
+library(MASS) #lda
 library(ISLR) #install.packages("ISLR")
-library(class)
+library(class) #KNN
 library(tidyverse)
 library(boot)
 library(Rcpp)

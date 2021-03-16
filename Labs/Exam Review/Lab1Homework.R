@@ -220,3 +220,92 @@ glimpse(Boston[rm>8, ])
 
 
 #Chapter 3
+
+data(Auto)
+fit = lm(mpg ~horsepower, data = Auto) ##responder = mpg, predictor = horsepower
+summary(fit)
+
+# a generic function for predictions from the results of various model fitting functions
+predict(fit, data.frame(horsepower = 98), interval = "confidence")
+
+#a range of values that is likely to contain the value of a single new obervation given
+predict(fit, data.frame(horsepower = 98), interval = "prediction")
+
+plot(Auto$horsepower, Auto$mpg, xlab="Horsepower", ylab = "Miles per gallon")
+abline(fit, lwd = 3, col = "red") #linear regression line
+
+par(mfrow = c(2,2)) #residuals vs. fitted and scale location should be flat. residuals vs. leverage should be clumpy. Normal qq should be close to the line
+plot(fit)
+
+pairs(~mpg + cylinders + displacement + horsepower + weight + acceleration + year, Auto)
+
+print(Auto$origin)
+
+sapply(Auto, class)
+cor(Auto[,-c(8,9)])
+glimpse(Auto)
+
+mpg.fit = lm(mpg ~ . - name, data = Auto) #all variables are predictors except the name
+summary(mpg.fit)
+
+par(mfrow = c(2,2)) #residuals vs. fitted and scale location should be flat. residuals vs. leverage should be clumpy. Normal qq should be close to the line
+plot(mpg.fit)
+
+#from the correlation matrix, we obtained the two highest correlated pairs
+fit3 = lm(mpg ~ cylinders*displacement+displacement*weight, data = Auto[, 1:8]) #individuals and interactions
+summary(fit3)
+
+fit13 = lm(mpg ~ cylinders * displacement, data = Auto[, 1:8])
+summary (fit13)
+
+fit14 = lm(mpg ~ cylinders + cylinders : displacement, data = Auto[, 1:8]) #colon is for just two different ones
+summary(fit14)
+
+fit22 = lm(mpg ~ cylinders : displacement, data = Auto[, 1:8]) 
+summary(fit22)
+
+names(Auto)
+fit15 = lm(mpg ~ poly(horsepower, 5), data = Auto[, 1:8]) #different polynomials-- see what it is significant to and then stop once it becomse less significant
+summary(fit15)
+
+par(mfrow = c(2,2)) #cooks distance means there is no leverage. Concentration means good. 
+plot (fit15)
+
+ggplot(Auto, aes(horsepower, mpg)) +
+  geom_point() +
+  stat_smooth(method = lm, formula = y ~ poly(X, 5, raw = TRUE))
+
+#from the pvalues, we can see that the interaction between displacement and weight is significant
+#while the interaction between cylinders and displacement is not
+
+par(mfrow = c(2,3))
+plot(log(Auto$horsepower), Auto$mpg)
+plot(sqrt(Auto$horsepower), Auto$mpg)
+plot((Auto$horsepower)^2, Auto$mpg)
+plot (Auto$horsepower, Auto$mpg)
+
+data(Carseats)
+glimpse(Carseats)
+sapply(Carseats, class)
+fit4 = lm(Sales ~ Price + Urban + US, data = Carseats)
+summary(fit4)
+
+fit5 = lm(Sales ~ Price + US, data = Carseats)
+summary(fit5)
+
+fit15 = lm(Sales ~ Price + Urban, data = Carseats)
+summary(fit15)
+
+fit25 = lm(Sales ~ Price,data = Carseats)
+summary(fit25)
+
+fit35 = lm(Sales ~ poly(Price,5), data = Carseats)
+summary(fit35)
+
+plot(Carseats$Price, Carseats$Sales)
+abline(fit25, lwd = 3, col = "red")
+
+confint(fit25)
+
+par(mfrow = c(2,2)) #normal distribution upper right
+plot(fit5)
