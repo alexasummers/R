@@ -200,3 +200,90 @@ for (i in 1:4) {
 MSE_LOOCV
 
 plot(MSE_LOOCV, type="b")
+
+#k-fold CV
+
+MSE_10_cv = NULL
+for(i in 1:4) {
+  model = glm(X2~poly(X1, i), data=df)
+  MSE_10_cv[i] = cv.glm(df, model, K = 4)$delta[1]
+}
+MSE_10_cv
+
+lines(MSE_10_cv, type = "b", col="red")
+
+MSE_10_cv = NULL
+for(i in 1:3) {
+  model = glm(X2~poly(X1, i), data=df)
+  MSE_10_cv[i] = cv.glm(df, model, K = 2)$delta[1]
+}
+MSE_10_cv
+
+lines(MSE_10_cv, type = "b", col="red")
+
+MSE_10_cv = NULL #with something like this (a linear increase from 1 to 2 index along  the x axis, the best degree is 1)
+for(i in 1:2) {
+  model = glm(X2~poly(X1, i), data=df)
+  MSE_10_cv[i] = cv.glm(df, model, K = 2)$delta[1]
+}
+MSE_10_cv
+
+plot(MSE_10_cv, type = "b", col="red")
+
+
+
+
+logmod = glm(Y~ X1+X2+X3, family = binomial, data = df)
+summary(logmod)
+
+#mistakes made by logistic regression
+probs = predict(logmod, type="response")
+print(probs)
+preds = rep("NO", 8)
+preds[probs > 0.7] = "YES"
+table(preds, df$Y) #the error rate is going to be the mismatched ones
+
+hist(probs, breaks = 100, col="darkred")
+abline(v=mean(probs), lwd=2)
+
+plot(probs, col=ifelse(df$Y=="YES", "red", "green"), pch=16)
+abline(h=0.7, lwd=3)
+
+#------------------------------------------------------------------------------------------------------------------------
+
+train = (df$X4 < 1)
+training.data = df[train, ]
+test.data = df[!train, ]
+
+head(test.data)
+
+simpglm = glm(Y~X1+X2+X3, family = binomial, subset = train)
+
+testprobs = predict(simpglm, type="response")
+print(testprobs)
+testdirs = df$Y[df$X4 > 0]
+plot(testprobs, col = ifelse(df$Y[df$X4 > 0] =="YES", "red", "green"), pch=16)
+abline(h=.05, lwd=3)
+
+testpreds = rep("NO", 3)
+testpreds[testprobs>0.5]="YES"
+mean(testprobs)
+
+table(testpreds, testdirs)
+
+testpreds = rep("NO", 3)
+testpreds[testprobs>0.3] = "YES"
+mean(testprobs)
+
+#LDA
+
+lda.fit = lda(Y ~X1+X2+X3, data = training.data)
+lda.fit
+plot(lda.fit)
+
+lda.pred = predict(lda.fit, newdata=test.data, type="response")
+lda.class = lda.pred$class
+table(lda.class, test.data$Y)
+
+
+
