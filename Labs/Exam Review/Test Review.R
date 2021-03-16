@@ -6,10 +6,11 @@
 
 #KNN questions
 library(MASS)
-library(ISLR)
+library(ISLR) #install.packages("ISLR")
 library(class)
 library(tidyverse)
 library(boot)
+library(Rcpp)
 #install.packages("tidyverse")
 
 
