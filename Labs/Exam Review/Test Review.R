@@ -9,6 +9,7 @@ library(MASS)
 library(ISLR)
 library(class)
 library(tidyverse)
+library(boot)
 #install.packages("tidyverse")
 
 
@@ -156,3 +157,46 @@ for(d in degree){
 print(gen.error)
 lines(degree, gen.error, type="b", col="red")
 
+set.seed(3)
+train = sample(8,5)
+
+gen.error = rep(0,3)
+degree=1:3
+for(d in degree){
+  glm.fit=glm(X2~poly(X1,d), , data=df, subset = train)
+  gen.error[d]=mean((X2-predict(glm.fit, df))[-train]^2)
+}
+print(gen.error)
+lines(degree, gen.error, type="b", col="green")
+
+#plots will not show up if the gen.error print is higher than the other one
+
+set.seed(4)
+train = sample(8,5)
+
+gen.error = rep(0,3)
+degree=1:3
+for(d in degree){
+  glm.fit=glm(X2~poly(X1,d), , data=df, subset = train)
+  gen.error[d]=mean((X2-predict(glm.fit, df))[-train]^2)
+}
+print(gen.error)
+lines(degree, gen.error, type="b", col="blue")
+
+#Simple MSE example without any training separation
+#LOOCV <---takes time
+attach(df)
+#fit s linear model
+model = glm(X2~X1, data = df)
+MSE_LOOCV = cv.glm(df,model)
+##formula 5.1 and 5.2-- choose 5.1
+MSE_LOOCV$delta[1]
+
+MSE_LOOCV = NULL
+for (i in 1:4) {
+  model = glm(X2~poly(X1, i), data=df)
+  MSE_LOOCV[i] = cv.glm(df,model)$delta[1]
+}
+MSE_LOOCV
+
+plot(MSE_LOOCV, type="b")
