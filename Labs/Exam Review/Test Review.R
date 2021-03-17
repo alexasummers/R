@@ -11,6 +11,7 @@ library(class) #KNN
 library(tidyverse)
 library(boot)
 library(Rcpp)
+library(default)
 #install.packages("tidyverse")
 
 

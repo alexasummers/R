@@ -245,3 +245,44 @@ par(mfrow=c(1,1))
 plot (probs, col = ifelse(test_set$mpg01==0, "red", "blue"), pch = 16)
 abline(h=.5, lwd=3)
 
+#KNN K=1, 100
+vars = c("cylinders", "weight", "displacement", "horsepower")
+train_matrix = as.matrix(train_set[,vars])
+test_matrix = as.matrix(test_set[,vars])
+
+predictions = knn(train_matrix, test_matrix, train_set$mpg01,1)
+
+summary(predictions)
+print(predictions)
+
+run_knn(train_matrix, test_matrix,train_set$mpg01, test_set$mpg01, k = 10)
+run_knn(train_matrix, test_matrix,train_set$mpg01, test_set$mpg01, k = 100)
+
+bestK = function(trData, trLabels, tsData, tsLabels) {
+  ctr = c(); cts =c()
+  for(k in 1:100) {
+    knnTr = knn(trData, trData, trLabels, k)
+    knnTs = knn(trData, tsData, trLabels, k)
+    trTable = prop.table(table(knnTr, trLabels))
+    tsTable = prop.table(table(knnTs, tsLabels))
+    erTr = trTable[1,2] + trTable[2,1]
+    erTs = tsTable[1,2] + tsTable[2,1]
+    ctr = c(ctr, erTr)
+    cts = c(cts, erTs)
+}
+#acc = data.frame(k=1/c(1:100), trER=ctr, tsER=cts)
+err = data.frame(k-1:100, trER=ctr, tsER=cts)
+return(err)
+}
+
+err = bestK(train_matrix, train_set$mpg01, test_matrix, test_set$mpg01)
+summary(err)
+
+plot(err$k, err$trER, type='o',ylim=c(0,.5),xlab="k", ylab="Error rate",col="blue")
+lines(err$k, err$tsER,type='o',col="red")
+
+run_knn(train_matrix, test_matrix, train_set$mpg01, test_set$mpg01, k=1)
+
+run_knn(train_matrix, test_matrix, train_set$mpg01, test_set$mpg01, k=10)
+
+run_knn(train_matrix, test_matrix, train_set$mpg01, test_set$mpg01, k=100)
