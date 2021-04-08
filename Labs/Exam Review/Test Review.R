@@ -51,7 +51,6 @@ fit = lm(X1 ~ Y, data= dr)
 
 #Make a linear regression using X1 as a responder and Y and X2 as a predictor
 fit = lm (X1 ~ Y+X2, data = dr)
-
 #Write the linear model
 # Responder = Intercept estimate + variable2Estimate * variable2 + variable3Estimate * variable3...
 
