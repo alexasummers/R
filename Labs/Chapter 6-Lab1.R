@@ -4,6 +4,8 @@ library(class)
 library(tidyverse)
 library(caret)
 library(leaps) #forward or backwards stepwise, or sequential replacement (model selection by exhaustive search (default))
+#install.packages("tidyverse")
+library(glmnet)
 
 #install.packages("caret")
 
@@ -144,9 +146,63 @@ points(9,rmse.cv[9],pch=20,col="red")
 
 #all the above is for subset selection
 
+#lm or aov or glm to fit a linear or a generalized linear model,
+#the model matrix is created from the formula and data arguments automatically.
+
+lm.full = lm(Salary~., data=Hitters)
+summary(lm.full)
+model.matrix(lm.full)
+
+
 #we will use pack glmnet, which does not use the model formula language,
 #so we will set up on x and y
 #ridge regression(alpha = 0) and the Lasso (alpha =1, default)
 
+x=model.matrix(Salary~.-1, data=Hitters) #Separate out the predictors
+x
+y = Hitters$Salary #Responder
+y
 
+fit.ridge=glmnet(x,y,alpha=0)
+summary(fit.ridge)
+plot(fit.ridge, xvar="lambda", label=TRUE) #Predictor number displayed across the top-- doesn't change. The lambda is getting bigger. As coefficients shrink, the predictors are the same number. 
 
+#number of variables are 20 always
+#k-fold cross-validation fior glmnet, produces a plot and returns a value for lambda
+cv.ridge=cv.glmnet(x,y,alpha=0)
+plot(cv.ridge) #range of mse. 
+coef(cv.ridge) #all the predictors get closer to zero as the mse value is less. 
+
+#lasso
+fit.lasso=glmnet(x,y)
+summary(fit.lasso)
+#number of variables decrease (more zero coefficients)
+plot(fit.lasso,xvar="lambda", label=TRUE) #default is 1, so we don't need to set the alpha
+#number of coefficients is going down as lambda gets bigger
+
+plot(fit.lasso,xavr="dev", label = TRUE)
+
+cv.lasso=cv.glmnet(x,y)
+plot(cv.lasso)
+
+coef(cv.lasso) #all the blank numbers are where the coefficients became zero
+
+lasso.tr=glmnet(x[train,], y[train]) #make a training set for lasso
+lasso.tr
+
+pred=predict(lasso.tr,x[-train,])
+dim(pred) #83 rows and 70 columns
+
+#create the mean squared error (RMSE)
+rmse = sqrt (apply((y[-train]-pred)^2,2,mean))
+print (rmse)
+summary(rmse) #we want to look at the min value and see what lambda was to get the minimum
+plot(log(lasso.tr$lambda),rmse,type="b", xlab="Log(lambda)")
+lam.best=lasso.tr$lambda[order(rmse)[1]]
+min(rmse) #reiterates the lowest value displayed in the summary
+lam.best
+log(lam.best)
+
+#find the lowest value
+points(log(lam.best),rmse[20],pch=20,col="red")
+coef(lasso.tr,s=lam.best)
