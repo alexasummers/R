@@ -3,6 +3,8 @@ library(ISLR)
 library(class)
 library(tidyverse)
 library (splines)
+library(gam)
+#install.packages("gam")
 
 #wage and other data for a group of 3000 male workers in the midadlantic region
 #with 11 variables
@@ -120,4 +122,26 @@ lines(fit2, col = "blue", lwd = 2)
 title("Smoothing spline")
 legend ("topright", legend = c("Cubic", "16 DF ", "6.8 DF"), col = c("green","red","blue"), lty = 1, lwd = 2, cex=.8)
 
+#GAM
 
+#s() is part of the gam library for a smoothing spline
+#specify that the function of year should have 4 degrees of freedom,
+#and that the function of age will have 4 degrees of freedom
+
+gam1 = gam(wage ~s(year, df=4)+ s(age,df=4) + education, data=Wage) #smoothing spline for year and age and nothing for education
+par(mfrow = c(1,3))
+plot(gam1, se=TRUE, col = "blue")
+
+
+gam.lr = gam(I(wage > 250) ~ s(age,df=4) + year + education, family = binomial, data = Wage)
+par(mfrow = c(1,3))
+plot(gam.lr)
+
+
+gamx = gam(I(wage > 250) ~ s(age, df=4)+year+education, family = binomial, data=Wage)
+anova(gamx,gam.lr,test="Chisq")
+
+par(mfrow = c(1,3))
+lm1=lm(wage~ns(year,4) + ns(age,5) + education, data=Wage)
+
+plot.Gam(lm1, se=T, col="Green")
