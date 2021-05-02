@@ -10,6 +10,7 @@ library(splines)
 attach(Wage)
 require(tree)
 library(randomForest)
+library(e1071)
 
 #Stepwise selection(forward and backward)
 #For the given data, use the regsubsets() function to perform forward stepwise
@@ -286,10 +287,166 @@ text(prune.car, pretty = 0)
 #given Carseats data
 #train = sample(1:nrow (Carseats), 250)
 #carseat has 400 observations on 11 variables
-
 #Q8.a) Split the data set into a training set (200) and a test set(200)
 train = sample(1:nrow(Carseats), nrow(Carseats)/2)
 Carseats.train = Carseats[train, ]
 Carseats.test = Carseats[-train, ]
 #given so far
 
+#Q8.d: bagging --> use all 10 variables (mtry = 10) (there are 11 in the dataset, so we use the mtry as minus 1)
+#predict with the test dataset
+#find the mean value
+# what are the important variables?
+set.seed(1)
+bag.car = randomForest(Sales~.,data=Carseats.train, mtry = 10, importance = TRUE)
+yhat.bag = predict(bag.car, newdata= Carseats.test)
+mean((yhat.bag-Carseats.test$Sales)^2)
+importance(bag.car) #look at the ones that are the highest
+varImpPlot(bag.car) #plot graph of the highest importance ones
+
+#Q8.e: randomforest --> use partial number of variables (mtry = 5)
+#predict with the test dataset
+#find the mean value
+# what are the important variables?
+rf.carseats = randomForest(Sales ~., data = Carseats.train, mtry = 5, ntree = 500, importance = TRUE)
+yhat.rf = predict(rf.carseats, newdata = Carseats.test)
+mean((yhat.rf - Carseats.test$Sales)^2)
+
+#in some cases, randomForest does not do better than bagging
+importance(rf.carseats)
+varImpPlot(bag.car)
+
+#what if we have six variables?
+rf.carseats = randomForest(Sales ~., data = Carseats.train, mtry = 6, ntree = 500, importance = TRUE)
+yhat.rf = predict(rf.carseats, newdata = Carseats.test)
+mean((yhat.rf - Carseats.test$Sales)^2)
+
+importance(rf.carseats)
+varImpPlot(bag.car)
+
+
+#Q use the following boston data
+
+set.seed(1011)
+#bagging
+dim(Boston)
+#train and test
+set.seed(2)
+train = sample(1: nrow(Boston),200)
+
+#given so far
+#This is bagging because there are 14 rows, so my mtry is 13
+bag.boston = randomForest(medv~., data = Boston, subset = train, mtry = 13, importance = TRUE)
+boston.test = Boston [-train, "medv"]
+yhat.bag = predict (bag.boston, newdata = Boston[-train, ])
+plot(yhat.bag, boston.test)
+abline(0,1)
+mean((yhat.bag - boston.test)^2)
+importance(bag.boston)
+varImpPlot(bag.boston)
+
+#ntree = 25
+bag.boston = randomForest(medv~., data = Boston, subset = train, mtry = 13, ntree = 25)
+yhat.bag = predict(bag.boston, newdata = Boston[-train,])
+mean((yhat.bag - boston.test)^2) #the more trees you have, the better the results. I'm using 25 here instead of just 1
+
+set.seed(1)
+rf.boston = randomForest(medv~., data = Boston, subset = train, mtry = 6, importance = TRUE)
+yhat.rf = predict (rf.boston, newdata = Boston [-train, ])
+mean((yhat.rf - boston.test) ^2)
+varImpPlot (rf.boston)
+
+#Q Use the following boston data
+
+set.seed(1011)
+#bagging
+dim(Boston)
+#train and test
+set.seed(2)
+train = sample(1: nrow(Boston),200)
+
+#error of all trees fitted
+oob.err = double(13)
+#mean squared test error
+test.err = double(13)
+test2.err=double(13)
+boston.test = Boston [-train, "medv"]
+
+Boston.rf = randomForest (medv ~., data = Boston, subset = train)
+Boston.rf #displays number of variables, number of trees, MSE, type of random forest
+plot(Boston.rf)
+
+#mtry is number of variables randomly chosen at each splot
+for(mtry in 1:13) {
+  rf = randomForest(medv ~., data = Boston, subset = train, mtry = mtry, ntree = 400)
+  oob.err[mtry] = rf$mse[400] #Error of all trees fitted
+  
+  pred = predict(rf, Boston[-train,]) #Predictions on test set for each tree
+  test.err[mtry] = with(Boston[-train,], mean((medv - pred)^2)) #mean squared test error
+  
+  pred2 = predict(rf, newdata = Boston[-train,]) #Predictions on test set for each tree
+  test2.err[mtry] = mean((pred2 - boston.test)^2) #mean squared test error
+  
+  cat(mtry, " ") #Printing the output to the console
+}
+
+test.err
+test2.err
+oob.err
+
+plot(test.err)
+which.min(test.err)
+points(which.min(test.err), test.err[which.min(test.err)], col = 'red', cex = 2, pch = 19)
+
+plot(oob.err)
+which.min(oob.err)
+points(which.min(oob.err), oob.err[which.min(oob.err)], col = 'red', cex = 2, pch = 19)
+
+#plotting both the test error and out of bag error together
+matplot(1:mtry, cbind(oob.err, test.err), pch = 19, col = c("red", "blue"), type = "b", ylab = "mean squared error", xlab="number of predictors considered at each split")
+legend("topright", legend=c("out of bag error", "test error"), pch = 19, col = c("red", "blue"))
+
+# Q. For the given dataset, find the best gamma and cost parameter for SVM radial kernal
+#Plot SVM
+#Find the prediction accuracy
+
+set.seed(1)
+x = matrix(rnorm(200 * 2), ncol = 2)
+x[1:100,] = x[1:100, ] + 2
+x[101:150,] = x[101:150, ] -2
+y = c(rep(1, 150), rep(2,50))
+dat = data.frame(x = x, y=as.factor(y))
+train = sample(200, 100)
+plot(x, col = y)
+#given
+
+svmfit = svm(y~., data = dat[train,], kernel = "radial", gamma = 1, cost = 1)
+plot(svmfit, dat[train,])
+summary(svmfit)
+
+#increase the value of cost, we can reduce the number of training errors
+#However this comes at the price of a more irregular decision boundary
+
+svmfit = svm(y~., data = dat[train, ], kernel = "radial", gamma = 1, cost = 1e5)
+plot(svmfit, dat[train,])
+summary(svmfit)
+
+#given the value, what is the best cost? Gives me the best paramater at the top of the list
+set.seed(1)
+tune.out = tune(svm, y~., data = dat[train, ] , kernel = "radial", ranges = list(cost = c(0.1, 1, 10, 100, 1000), gamma = c(0.5, 1, 2, 3, 4)))
+summary(tune.out)
+#The best choice of parameters invloves cost = 1 and gamma = 2
+
+#What is the accuracy?
+table(true = dat[-train, "y"], pred = predict(tune.out$best.model, newdata = dat[-train, ]))
+(67+21)/100 #based on the matching 1:1 and 2:2 divided by 100 total observations
+
+#What is the best cost?
+tune.out$best.parameters$cost
+#what is the best gamma?
+tune.out$best.parameters$gamma
+#Draw svm classification plot using the best values.
+svmfit = svm(y~., data = dat[train,], kernel = "radial", gamma = tune.out$best.parameters$gamma, cost = tune.out$best.parameters$cost)
+plot(svmfit, dat[train,])
+
+#use a linear kernel
