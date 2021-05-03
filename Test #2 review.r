@@ -450,3 +450,40 @@ svmfit = svm(y~., data = dat[train,], kernel = "radial", gamma = tune.out$best.p
 plot(svmfit, dat[train,])
 
 #use a linear kernel
+set.seed(1)
+tune.out = tune(svm, y~., data = dat[train, ], kernel = "linear", ranges = list(cost = c(0.1, 1, 10, 100, 1000)))
+summary(tune.out)
+
+#what is the accuracy?
+table(true = dat[-train, "y"], pred = predict(tune.out$best.model, newdata = dat[-train,]))
+77/100
+#what is the best cost?
+tune.out$best.parameters$cost
+#draw SVM classification plot using the best values
+
+svmfit = svm(y~., data = dat[train, ], kernel="linear", cost = tune.out$best.parameters$cost)
+plot(svmfit, dat[train,])
+svmfit$index
+
+#use cost 1e+10
+set.seed(1)
+tune.out = tune(svm, y~., data = dat[train, ], kernel = "linear", ranges = list(cost = c(1e+10)))
+summary(tune.out)
+#what is the accuracy?
+table(true = dat[-train, "y"], pred = predict(tune.out$best.model, newdata = dat[-train, ]))
+
+svmfit = svm(y~., data = dat[train,] , kernel = "linear", cost = tune.out$best.parameters$cost)
+plot(svmfit, dat[train,])
+svmfit$index
+summary(svmfit)
+
+set.seed(1)
+tune.out = tune(svm, y~., data = dat[train, ], kernel = "polynomial", ranges = list(cost = c(0.1, 1, 10, 100, 1000), gamma = 1))
+summary(tune.out)
+
+table(true = dat[-train, "y"], pred = predict(tune.out$best.model, newdata = dat[-train,]))
+
+svfit1 = svm(y~., data = dat[train,], kernel ="polynomial", gamma = 1, cost = tune.out$best.parameters$cost)
+plot(svfit1, dat[train,])
+svfit1$index
+summary(svfit1)
