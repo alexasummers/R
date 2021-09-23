@@ -4,6 +4,9 @@ library(class)
 library(tidyverse)
 library(e1071)
 
+require (ISLR)
+require (tree)
+
 #SVM _ simulated data
 
 set.seed(10111)
@@ -83,3 +86,34 @@ points(x, col = y + 1, pch = 19)
 contour(px1, px2, matrix(func, 69, 99), level = 0, add = TRUE)
 contour(px1, px2, matrix(prob, 69, 99), level = 0.5, add = TRUE, col = "blue", lwd = 2)
 contour(px1, px2, matrix(prob, 69, 99), level = 0.6, add = TRUE, col = "green", lwd = 2)
+
+
+x1 = c(3, 2, 4, 1, 2, 4, 4)
+x2 = c(4, 2, 4, 4, 1, 3, 1)
+colors = c("red", "red", "red", "red", "blue", "blue", "blue")
+plot(x1, x2, col = colors, xlim = c(0, 5), ylim = c(0,5))
+
+# X1-X2-0.5 = 0
+plot (x1, x2, col = colors, xlim = c(0,5), ylim = c(0,5))
+abline(-0.5, 1) #Intercept and slope, a single line
+
+plot (x1, x2, col = colors, xlim = c(0,5), ylim = c(0,5))
+abline(-0.5, 1)
+abline(-1, 1, col = "red", lty = 2)
+abline(0, 1, col = "red", lty = 2)
+#the support vectors are the points (2,1), (2,2), (4,3), and (4,4)
+
+plot(x1, x2, col = colors, xlim = c(0, 5), ylim = c(0, 5))
+abline(-0.5, 1)
+arrows(2, 1, 2, 1.5)
+arrows(2, 2, 2, 1.5)
+arrows(4, 4, 4, 3.5)
+arrows(4, 3, 4, 3.5)
+
+# X1-X2-0.3 = 0 not optimal
+plot (x1, x2, col = colors, xlim = c(0,5), ylim = c(0,5))
+abline(-0.8, 1)
+
+#Add an observation to make inseparable by a hyperplane
+plot (x1, x2, col = colors, xlim = c(0,5), ylim = c(0,5))
+points(c(4), c(2), col = c("red"))
